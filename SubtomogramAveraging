@@ -1,0 +1,166 @@
+#Script for automated e2boxer particle picking - Zoe Hu Summer 2016
+
+
+
+#this script inputs all the .box files from e2boxer outputting 1 txt file
+#this txt file contains the start and end coordinates of all the points 
+#convert this txt file into .mod which you can then use for PEET 
+
+#instructions: 
+#obtain .box files for each 2D slice containing particles from e2boxer
+#Modify the first, last and filename parameter to the .box files you named 
+#Modify the start slice (choose one in the middle) 
+#Modify the box size of e2boxer, you can also modify the filename you output
+
+#This is what you input into terminal to convert the txt file into .mod
+#point2model -input file.txt -output myfile.mod -open -number 1 -sphere 2
+
+#contact me if you have any questions zoe.hu@mail.mcgill.ca
+
+
+################################################## change first and last 
+
+first = 1
+last = 69
+
+
+for x in range (first, last, 2):
+	fileName = "dataA-%d.box" %(x)
+	
+	#import csv 
+	#locals()["results"+str(x)] = [] 
+	#with open(fileName) as inputfile:
+		#for row in csv.reader(inputfile):
+			#locals()["results"+str(x)].append(row)
+
+	file = open(fileName, 'rt')
+	locals()["results"+str(x)] = [[int(word) for word in line.split()] for line in file.readlines()]
+
+	for row in locals()["results"+str(x)]:
+		del row[2]
+		#del row[3]
+
+     
+###############################################################################
+#manually decide which slice do you want to start with 
+#compare each value to every value in the next list (both x and y), for(for)
+#if the same, add data of each spike into an individual table 
+#sort by z value
+#output the smallest and largest z value x and y coordinates into one table  
+
+print len(results11)
+
+start = 33
+length = len(locals()["results"+str(start)])
+
+
+for a in range (0, length):
+	locals()["point"+str(a)] = []
+	#print locals()["point"+str(a)] 
+
+
+for z in range (0, length):
+	#append into new list for each point 
+	locals()["point"+str(z)].append(locals()["results"+str(start)][z])
+	locals()["point"+str(z)][0][2] = start
+	#print locals()["point"+str(z)]
+	xcoord = locals()["point"+str(z)][0][0]
+	#print xcoord
+	ycoord = locals()["point"+str(z)][0][1]
+	#print ycoord
+	zcoord = start
+	#print zcoord
+
+	#loop through the individual list comparing 
+	for w in range (start + 2, last, 2):
+		for y in range (0, len(locals()["results"+str(w)])-1):
+			#if x and y the same then add to list 
+			if((abs(xcoord - locals()["results"+str(w)][y][0]) < 5) & (abs(ycoord - locals()["results"+str(w)][y][1]) < 5)):
+				#change to value you're comparing 
+				locals()["point"+str(z)].append(locals()["results"+str(w)][y]) 
+				locals()["point"+str(z)][-1][2] = w
+				xcoord = locals()["results"+str(w)][y][0]
+				ycoord = locals()["results"+str(w)][y][1]
+				print ycoord
+				zcoord = w
+			else: 
+				continue
+
+
+
+for z in range (0, length):
+	xcoord = locals()["point"+str(z)][0][0]
+	print xcoord
+	ycoord = locals()["point"+str(z)][0][1]
+	#print ycoord
+	zcoord = start
+	#print zcoord
+
+	#loop through the individual list comparing 
+	for w in range (start-2, first, -2):
+		#print w
+		for y in range (0, len(locals()["results"+str(w)])-1):
+			#if x and y the same then add to list 
+			#print locals()["results"+str(w)][y][0]
+			if((abs(xcoord - locals()["results"+str(w)][y][0]) < 5) & (abs(ycoord - locals()["results"+str(w)][y][1]) < 5)):
+				#change to value you're comparing 
+				locals()["point"+str(z)].append(locals()["results"+str(w)][y]) 
+				locals()["point"+str(z)][-1][2] = w
+				xcoord = locals()["results"+str(w)][y][0]
+				ycoord = locals()["results"+str(w)][y][1]
+				zcoord = w
+			else:
+				continue
+
+
+
+#compare value in each column/row thingy 
+for a in range (0, length):
+	locals()["point"+str(a)].sort(key=lambda x:x[2])
+
+#deletes list if only one coordinate
+for b in range (0, length):
+	if len(locals()["point"+str(b)]) < 2:
+		del locals()["point"+str(b)][:]
+
+print "%s" %(point13)
+
+#create final results table 
+finalPoints = []
+
+#place first and last point into new table
+for a in range (0, length):
+	#for b in range (0, len(locals()["point"+str(a)])):
+		#finalPoints.append(locals()["point"+str(a)][b])
+	if len(locals()["point"+str(a)]) > 1:
+		finalPoints.append(locals()["point"+str(a)][0])
+		finalPoints.append(locals()["point"+str(a)][-1])
+	elif len(locals()["point"+str(a)]) == 1:
+		continue
+
+ 
+#print "%s" %(finalPoints)
+
+#write each row of the table as a string, and then save each string into text file
+#add in spaces 
+
+################################################### change box size of e2boxer
+
+boxSize = 7.5 
+
+for x in range (0, len(finalPoints)):
+	xcoord = finalPoints[x][0] + boxSize
+	ycoord = finalPoints[x][1] + boxSize 
+	zcoord = finalPoints[x][2]
+	locals()["line"+str(x)] = '{0}  {1}  {2}'.format(xcoord, ycoord, zcoord)
+
+################################################### change file name that you output
+
+print "Hello"
+f = open("fileA2.txt", "w")
+for y in range (0, len(finalPoints)):
+	print "Hello"
+	print >>f, (locals()["line"+str(y)])
+f.close()
+    
+
