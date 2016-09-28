@@ -1,0 +1,279 @@
+import java.util.*;
+
+public class Conversion {
+ public static ArrayList<Integer> result = new ArrayList<Integer>();
+ public static String divValue = null;
+
+ /*public static void main(String[] args) {
+  short[] a = {5, 4, 2};
+  short[] b = { 1, 1, 0, 1, 0, 1 };
+  short[] c = { 6, 7, 7 };
+
+  short[] result = convertInt((short) 10, a, (short) 2);
+  // System.out.println(Arrays.toString(result));
+  // System.out.println(convertInt2(6, 247, 6));
+
+  short[][] result2 = convertDec((short) 6, a, (short) 7);
+  //short[] dx = result2[1];
+  //System.out.println(Arrays.toString(dx));
+  System.out.println(Arrays.toString(result2[0]));
+  System.out.println(Arrays.toString(result2[1]));
+  // convertDec((short)8, c, (short)4);
+
+ }*/
+
+ /*public Number convert (Number A, short Base){ 
+   //assume the short Base inputted is the base we would like to convert into 
+   Number B = new Number(); //creating new number object 
+   B.Base = Base; //this is the base we want the new number to be in 
+   B.int = convertInt(A.Base, A.Int,Base); //convert the integer array in a and place into B
+   short[][] decimals = convertDec(A.Base, A.NonRep, Base); //store the 2D array from convertDec method into a temporary one 
+   B.NonRep = decimals[0]; //place the non repeating decimals into the NonRep part of B 
+   B.Rep = decimals[1];//place the repeating decimals into the Rep part of B
+   
+   return B; 
+   
+  }*/
+
+ public short[][] convertDec(short B, short[] b, short R) { // method for converting the decimal portion
+  String temp = "0."; // converting the array B to a String
+  for (int i = b.length - 1; i >= 0; i--) {
+   temp += b[i];
+  }
+  double origDec = Double.parseDouble(temp); // converting the String of array b into a double
+
+  int Cpow = (int) Math.pow(10, b.length); //multiply the double so that it is no longer a decimal 
+  origDec = origDec * Cpow;
+  System.out.println(origDec);
+
+  int tempDec; 
+  int tempDec2;
+  int newDec = 0;
+  int counter = 0;
+  int resultDec = 0;
+
+  Vector<Integer> v = new Vector<Integer>();
+  //using a vector for the indexOf method which allows java to start searching for a specific object past a certain index 
+
+  while (origDec > 0 && counter < 100) { //while the original input is still larger than zero or we've obtained 100 digits of the decimal 
+
+   int tempDecd;
+   int tempDecm;
+   int tempDecp;
+   int tempDecd2;
+   int tempDecm2;
+   int tempDecp2a;
+   int Cpow2;
+   tempDec = 0;
+   
+   for (int i = 0; i < R; i++) { //loop R times
+    tempDecd = (int) origDec;
+    tempDecd2 = tempDec;
+    tempDec = 0;
+    tempDecp2a = 0;
+    tempDecp = 0; // power#
+    do {
+     //instead of multiplying by the new base, add n times to achieve multiplication, then divide by base to find remainder 
+     
+     tempDecm = tempDecd % 10; // Get digit on each position of original decimal
+     tempDecm2 = tempDecd2 % 10; // Get digit on each position of product
+
+     Cpow2 = (int) Math.pow(10, tempDecp++); //power# 
+
+     tempDecm2 += tempDecm + tempDecp2a; //adding R times to achieve multiplication (basically multiplying by R) 
+
+     tempDecp2a = tempDecm2 / B; // get carry-over digit
+
+     tempDecm2 = tempDecm2 % B; //divide by old base to find remainder 
+
+     tempDec = tempDec + ((tempDecm2 % 10) * Cpow2); //add on to tempDec
+
+     tempDecd = tempDecd / 10; //divide by 10 
+     tempDecd2 = tempDecd2 / 10; //divide by 10
+     
+    } while (tempDecd > 0); //while tempDecd is still larger than zero 
+    tempDec += (tempDecp2a + tempDecd2) * Cpow2 * 10; //add onto tempDec 
+    
+   }
+
+   
+   tempDec2 = convertInt2(B, (int) tempDec, B); //convert tempDec into original base 
+  
+   newDec = tempDec2 / Cpow; //divide by Cpow 
+
+   origDec = tempDec2 - newDec * Cpow;
+
+   if (B <= newDec) { //convert into new base
+    resultDec = convertInt2(B, newDec, R);
+   } else {
+    resultDec = newDec;
+   }
+   ++counter; //add the counter
+
+   v.add(resultDec); //add each digit onto the vector 
+  }
+
+
+  ArrayList<Integer> nonRep = new ArrayList<Integer>();
+  ArrayList<Integer> repDec = new ArrayList<Integer>();
+
+  //add the decimal onto an ArrayList, first assuming it's non-repeating 
+   for (int i=v.size()-1; i>=0; i--) {
+    nonRep.add(v.get(i));
+   }
+  //determine if it's repeating + where it's repeating
+
+   int foundflag;
+   int j, k, l;
+   for (int i = 0; i < v.size(); i++) { //for every digit in the vector 
+    
+    resultDec = v.elementAt(i); //resultDec stores the digit at i 
+
+    j = i;
+    foundflag = 0;
+    while (j++ < v.size()) { //while j is smaller than the size of the vector 
+     if (v.indexOf(resultDec, j) >= 0) { //look for the digit starting at position j
+      // verify 3 numbers of each cycle (so that even if it's binary we can verify if it's repeating or not)
+      k = v.indexOf(resultDec, j); //store the position in k 
+      
+      //checking the 3 numbers of each cycle 
+      
+      l = k - i;
+      if ((i + 2 * l + 2) < v.size()) { //second cycle check 
+       if ((v.elementAt(i) == v.elementAt(i + 2 * l)) //if it's equal at the first number 
+         && (v.elementAt(i + 1) == v.elementAt(i + 2 * l + 1)) //if it's equal at the second number 
+         && (v.elementAt(i + 2) == v.elementAt(i + 2 * l + 2))) { //if it's equal at the third number 
+       
+        if ((i + 3 * l + 2) < v.size()) { //third cycle check 
+         if ((v.elementAt(i) == v.elementAt(i + 3 * l)) //if it's equal at the first number 
+           && (v.elementAt(i + 1) == v.elementAt(i + 3 * l + 1)) //if it's equal at the second number 
+           && (v.elementAt(i + 2) == v.elementAt(i + 3 * l + 2))) { //if it's equal at the third number 
+          
+          if ((i + 4 * l + 2) < v.size()) { //fourth cycle check
+           if ((v.elementAt(i) == v.elementAt(i + 4 * l)) //if it's equal at the first number 
+             && (v.elementAt(i + 1) == v.elementAt(i + 4 * l + 1)) //if it's equal at the second number 
+             && (v.elementAt(i + 2) == v.elementAt(i + 4 * l + 2))) { //if it's equal at the third number 
+             
+            if ((i + 5 * l + 2) < v.size()) { //fifth cycle check
+             if ((v.elementAt(i) == v.elementAt(i + 5 * l)) //if it's equal at the first number 
+               && (v.elementAt(i + 1) == v.elementAt(i + 5 * l + 1)) //if it's equal at the second number 
+               && (v.elementAt(i + 2) == v.elementAt(i + 5 * l + 2))) { //if it's equal at the third number 
+              
+              foundflag = 1; //marking it as found
+              //System.out.println("found 1st loop starting from element[" + i + "]");
+              //System.out.println("found 2nd loop starting from element[" + k + "]");
+              
+              nonRep.clear();
+              for (int x=k-1; x>=i; x--){ // adding into two separate ArrayLists
+               repDec.add(v.elementAt(x)); //repeating decimal portion
+              }
+              for (int x=i-1; x>=0; x--){
+               nonRep.add(v.elementAt(x)); //non repeating decimal portion
+              }
+
+              // V is V[0] to V[i-1]
+              // W is V[i] to V[k-1]
+              break; // found the repeating decimal loop
+             }
+            } // 5th verification
+           }
+          } // 4th verification
+         }
+        } // 3rd verification
+       }
+      } // 2nd verification
+     }
+     if (foundflag == 1) {
+      break; // exit the while when found
+     }
+    }
+    if (foundflag == 1) {
+     break; // exit the for when found
+    }
+  }
+
+  short[][] resultArray = new short[2][]; //creating a 2D array
+  resultArray[0] = new short[nonRep.size()];
+  resultArray[1] = new short[repDec.size()];
+
+  for (int i = 0; i < nonRep.size(); i++) { //placing the non-repeating digits into index 0 of the 2D array
+   int x = nonRep.get(i);
+   resultArray[0][i] = (short) x;
+  }
+  for (int i = 0; i < repDec.size(); i++) { //placing the repeating digits into index 1 of the 2D array
+   int x = repDec.get(i);
+   resultArray[1][i] = (short) x;
+  }
+
+  return resultArray;
+ }
+
+ public short[] convertInt(short B, short[] a, short R) {
+  for (int i = a.length - 1; i >= 0; i--) { // convert short array into ArrayList
+   result.add((int) a[i]);
+  }
+
+  ArrayList<Integer> value = new ArrayList<Integer>();
+
+  while (result.size() > 0) { // while the result ArrayList larger than 0
+   value.add(remainder(B, R)); // add the remainder onto the valueArrayList
+  }
+
+  short[] value2 = new short[value.size()]; // create a short array to convert the ArrayList into a short array
+  for (int i = 0; i < value2.length; i++) {
+   int x = value.get(i); // getting the digit at that index and saving it temporarily in an integer
+   value2[i] = (short) x; // convert the int into a short and putting it into the short array
+  }
+  return value2; // return the converted number
+ }
+
+ public int remainder(short B, short R) { // method to find remainder and convert result ArrayList
+  ArrayList<Integer> intNum = new ArrayList<Integer>(); // create new ArrayList intNum
+  for (int i = 0; i < result.size(); i++) { // passing the integer number from result ArrayList to intNum
+   intNum.add(result.get(i));
+  }
+  result.clear(); // clear the result ArrayList
+  int temp = 0;
+
+  for (int i = 0; i < intNum.size(); i++) { // loop through the integer digits
+   int x = intNum.get(i); // placing the digit on an integer
+   temp = temp * B + x; // multiply by old base + digit
+   result.add(i, temp / R); // add the result of temp/new base onto the result arrayList
+   temp = temp % R; // save temp as the remainder of temp/new Base
+  }
+
+  while (result.size() > 0 && result.get(0) == 0) { // getting rid of any zeros at the start of the arrayList result
+   result.remove(0); // removing the zero at the start
+  }
+
+  return temp; // returning the remainder
+ }
+
+ public int convertInt2(int M, int Num, int N) { // basically the same method as convertInt but it returns an integer rather than an array
+  String MValue = ""; // easier for calculation within the convertDec method
+  String nValue = "";
+
+  MValue = Integer.toString(Num); // convert the integer to a string
+  divValue = MValue;
+  while (divValue.length() > 0) { // while the length of the value obtained from division is larger than zero, continue calling the remainder method
+   nValue = remainder2(M, divValue, N) + nValue; // this builds the converted number (from the remainder of each division)
+  }
+  return Integer.valueOf(nValue);
+ }
+
+ public String remainder2(int M, String MTempValue, int N) { // this method obtains the remainder from each division
+  divValue = "";
+  int temp = 0;
+  while (MTempValue.length() > 0) { // while the string still exists (each time one digit is taken off)
+   int t = Integer.parseInt(MTempValue.substring(0, 1)); // obtain the first digit of the string
+   MTempValue = MTempValue.substring(1); // remove the first digit of the string
+   temp = temp * M + t; // multiply by old base and add the first digit
+   divValue += Integer.toString(temp / N); // divide by the new base
+   temp = temp % N; // store the remainder of the division
+  }
+  while (divValue.length() > 0 && divValue.charAt(0) == '0') { // getting rid of any zeros at the start of the string
+   divValue = divValue.substring(1); // removing the zero
+  }
+  return Integer.toString(temp);
+ }
+}
